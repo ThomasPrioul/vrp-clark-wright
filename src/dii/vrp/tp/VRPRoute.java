@@ -9,7 +9,7 @@ import java.util.List;
  * @since Jan 21, 2016
  *
  */
-public class VRPRoute implements IRoute{
+public class VRPRoute implements IRoute {
 	/**
 	 * The route
 	 */
@@ -133,4 +133,21 @@ public class VRPRoute implements IRoute{
 		return this.route.getRoute();
 	}
 
+    @Override
+    public int getFirstCustomer() {
+        List<Integer> customers = route.getRoute();
+        if (customers != null && !customers.isEmpty()) {
+            return customers.get(0);
+        }
+        return -1;
+    }
+
+    @Override
+	public int getLastCustomer() {
+        List<Integer> customers = route.getRoute();
+	    if (customers != null && !customers.isEmpty()) {
+            return customers.get(customers.size() - 1);
+        }
+		return -1;
+	}
 }

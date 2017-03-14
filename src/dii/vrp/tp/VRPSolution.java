@@ -21,7 +21,7 @@ public class VRPSolution implements ISolution {
 	private double of=Double.NaN;
 	
 	public VRPSolution(){
-		this.routes=new ArrayList<IRoute>();
+		this.routes = new ArrayList<IRoute>();
 	}
 	
 	@Override
