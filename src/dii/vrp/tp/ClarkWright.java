@@ -200,7 +200,7 @@ public class ClarkWright {
             for (int i = 0; i < k; i++) {
                 VRPSolution sol = iterationSolutions[i];
                 if (sol != null && (bestSolution == null || sol.getOF() < bestSolution.getOF())) {
-                    bestSolution = (VRPSolution) sol.clone();
+                    bestSolution = sol;//(VRPSolution) sol.clone();
                     bestSavings = iterationSavings[i];
                 }
             }
