@@ -24,6 +24,11 @@ public class SavingsNode {
     }
 
     @Override
+    public SavingsNode clone() {
+        return new SavingsNode(from, to, savings);
+    }
+
+    @Override
     public boolean equals(Object object)
     {
         if (object != null && object instanceof SavingsNode)
