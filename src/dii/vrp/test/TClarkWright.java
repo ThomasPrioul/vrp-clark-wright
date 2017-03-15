@@ -8,24 +8,16 @@ import dii.vrp.tp.CVRPRouteEvaluator;
 import dii.vrp.tp.ClarkWright;
 import dii.vrp.tp.VRPSolution;
 import java.io.File;
+import java.io.FilenameFilter;
 
 public class TClarkWright {
     public static void main(String[] args) {
-
-
         // Instances to test
         File instancesDirectory = new File("./data/christofides-et-al-1979-cmt/");
 
         // Test every instance
-        for (File instance : instancesDirectory.listFiles()) {
+        for (File instance : instancesDirectory.listFiles((file, s) -> s.endsWith(".xml"))) {
             String filename = instance.getAbsolutePath();
-
-            // Only read XML files
-            if (!filename.endsWith(".xml"))
-                continue;
-
-            if (!filename.endsWith("CMT01.xml"))
-                continue;
 
             // Read data from the instance file and fire up the piloted Clark&Wright
             try (VRPREPInstanceReader parser = new VRPREPInstanceReader(filename)) {
@@ -33,20 +25,13 @@ public class TClarkWright {
                 IDemands demands = parser.getDemands();
                 double Q = parser.getCapacity("0");
 
-                System.out.println("Optimal CMT01:");
-                CVRPRouteEvaluator eval = new CVRPRouteEvaluator(distances, demands);
-                System.out.println(CMT01.getOptimalSolution(eval));
-
                 System.out.println("Testing instance " + instance.getName());
-
-
                 ClarkWright cw = new ClarkWright(distances, demands, Q);
-                //VRPSolution solution = (VRPSolution) cw.naiveRun();
-                VRPSolution solution = (VRPSolution) cw.pilotedRun(10);
+                VRPSolution solution = (VRPSolution) cw.naiveRun();
+                //VRPSolution solution = (VRPSolution) cw.pilotedRun(2, 100);
                 System.out.println(solution);
             }
-            catch (Exception e)
-            {
+            catch (Exception e) {
                 System.err.print(e);
             }
         }

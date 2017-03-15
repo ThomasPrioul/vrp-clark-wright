@@ -100,18 +100,19 @@ public class ClarkWright {
         return solution;
     }
 
-    private ArrayList<SavingsNode> cloneSavings(List<SavingsNode> src) {
+    /**
+     * Clones a List of SavingsNode.
+     * @param src The source List
+     * @return A new list wit
+     */
+    private List<SavingsNode> cloneSavings(List<SavingsNode> src) {
         ArrayList<SavingsNode> newList = new ArrayList<>();
         for (SavingsNode node: src)
             newList.add(node.clone());
         return newList;
     }
 
-    /**
-     * Runs a naive Clark&Wright algorithm without look-ahead technique.
-     * @return The optimized solution.
-     */
-    public ISolution naiveRun() {
+    private VRPSolution prepareInitialSolution() {
         // Master solution (naive version)
         VRPSolution solution = new VRPSolution();
 
@@ -125,35 +126,44 @@ public class ClarkWright {
             route.setCost(distances.getDistance(0, i) * 2);
             solution.addRoute(route);
         }
-
-        return run(solution, createSavingsList());
+        return solution;
     }
 
     /**
-     * Runs a PILOTed Clark&Wright algorithm using a look-ahead technique.
+     * Runs a naive Clark&Wright algorithm without look-ahead technique.
+     * @return The optimized solution.
+     */
+    public ISolution naiveRun() {
+        return run(prepareInitialSolution(), createSavingsList());
+    }
+
+    /**
+     * Runs a PILOT'ed Clark&Wright algorithm using a look-ahead technique.
      * @param k The heuristic value. Determines how many different solutions are created on each iteration
      *          of the optimization.
      * @return The optimized solution.
      */
     public ISolution pilotedRun(int k) {
+        return pilotedRun(k, 1);
+    }
+
+    /**
+     * Runs a PILOT'ed Clark&Wright algorithm using a look-ahead technique.
+     * @param k The heuristic value. Determines how many different solutions are created on each iteration
+     *          of the optimization.
+     * @param coefficient The coefficient applied to the heuristic. Changing this value can lead to better results.
+     * @return The optimized solution.
+     */
+    public ISolution pilotedRun(int k, int coefficient) {
         if (k <= 1)
             return naiveRun();
 
         // initialSolution
-        VRPSolution initialSolution = new VRPSolution();
-        for (int i = 1; i < distances.size(); i++) {
-            VRPRoute route = new VRPRoute();
-            route.add(0);
-            route.add(i);
-            route.add(0);
-            route.setLoad(demands.getDemand(i));
-            route.setCost(distances.getDistance(0, i) * 2);
-            initialSolution.addRoute(route);
-        }
+        VRPSolution initialSolution = prepareInitialSolution();
         List<SavingsNode> initialSavings = createSavingsList();
 
-        VRPSolution bestSolution = null; //(VRPSolution) run(initialSolution, initialSavings);
-        ArrayList<SavingsNode> bestSavings = cloneSavings(initialSavings);
+        VRPSolution bestSolution = null;
+        List<SavingsNode> bestSavings = initialSavings;
 
         // Find the best solution in k solutions for each iteration of the algorithm
         for (int iteration = 0; iteration < initialSavings.size(); iteration++) {
@@ -162,12 +172,12 @@ public class ClarkWright {
 
             // Can do this in parallel
             for (int swap = 0; swap < k; swap++) {
-                int jump = swap * 4;
+                final int jump = swap * coefficient;
 
                 // Swap element at 'iteration' index with element 'swap' steps away
                 if (iteration + jump < initialSavings.size()) {
-                    // Generate a different savings list
-                    ArrayList<SavingsNode> newSavings = cloneSavings(bestSavings);
+                    // Generate a different savings list by swapping 2 items
+                    ArrayList<SavingsNode> newSavings = (ArrayList<SavingsNode>)cloneSavings(bestSavings);
                     SavingsNode iterationNode = newSavings.get(iteration);
                     SavingsNode swapNode = newSavings.get(iteration + jump);
                     newSavings.set(iteration, swapNode);
@@ -175,11 +185,15 @@ public class ClarkWright {
 
                     iterationSavings[swap] = newSavings;
                     iterationSolutions[swap] = (VRPSolution) run(initialSolution, newSavings);
+                }
+            }
 
-                    if (bestSolution == null || iterationSolutions[swap].getOF() < bestSolution.getOF()) {
-                        bestSolution = (VRPSolution) iterationSolutions[swap].clone();
-                        bestSavings = iterationSavings[swap];
-                    }
+            // Change best solution when we've found a better one
+            for (int i = 0; i < k; i++) {
+                VRPSolution sol = iterationSolutions[i];
+                if (sol != null && (bestSolution == null || sol.getOF() < bestSolution.getOF())) {
+                    bestSolution = (VRPSolution) sol.clone();
+                    bestSavings = iterationSavings[i];
                 }
             }
         }
