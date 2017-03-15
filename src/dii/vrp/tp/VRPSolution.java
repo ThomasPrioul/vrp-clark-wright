@@ -109,7 +109,7 @@ public class VRPSolution implements ISolution {
 	 * @param i the possition in which the route must be inserted
 	 */
 	public void insertRoute(final IRoute r, int i){
-		this.routes.add(i, r);
+		this.routes.add(i, r.clone());
 	}
 	/**
 	 * 
@@ -117,8 +117,12 @@ public class VRPSolution implements ISolution {
 	 * @param i the position in the route
 	 * @return Returns the node in position <code>i</code> of route <code>r</code>
 	 */
-	public int getNode(int r, int i){
-		return this.routes.get(r).get(i);
+	public int getNode(int r, int i) {
+	    try {
+		    return this.routes.get(r).get(i);
+	    } catch (ArrayIndexOutOfBoundsException e) {
+            return -1;
+        }
 	}
 	/**
 	 * Sets the cost of a route
@@ -237,5 +241,4 @@ public class VRPSolution implements ISolution {
 			clone.add(r.clone());
 		return clone;
 	}
-	
 }

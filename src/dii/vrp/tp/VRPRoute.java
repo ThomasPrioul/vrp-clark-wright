@@ -132,22 +132,4 @@ public class VRPRoute implements IRoute {
 	public List<Integer> getRoute() {
 		return this.route.getRoute();
 	}
-
-    @Override
-    public int getFirstCustomer() {
-        List<Integer> customers = route.getRoute();
-        if (customers != null && !customers.isEmpty()) {
-            return customers.get(0);
-        }
-        return -1;
-    }
-
-    @Override
-	public int getLastCustomer() {
-        List<Integer> customers = route.getRoute();
-	    if (customers != null && !customers.isEmpty()) {
-            return customers.get(customers.size() - 1);
-        }
-		return -1;
-	}
 }

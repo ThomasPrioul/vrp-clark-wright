@@ -91,7 +91,4 @@ public interface IRoute extends Cloneable{
 	 * in which they are visited by the route.
 	 */
 	List<Integer> getRoute();
-
-	int getFirstCustomer();
-    int getLastCustomer();
 }
