@@ -113,5 +113,4 @@ public class TSPSolution implements IRoute, ISolution {
 	public List<Integer> getRoute() {
 		return this.route.getRoute();
 	}
-
 }

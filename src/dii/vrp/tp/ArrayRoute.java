@@ -109,6 +109,4 @@ public class ArrayRoute implements IRoute {
 	public List<Integer> getRoute() {
 		return new ArrayList<Integer>(this.route);
 	}
-
-
 }

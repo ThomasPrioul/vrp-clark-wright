@@ -9,7 +9,7 @@ import java.util.List;
  * @since Jan 21, 2016
  *
  */
-public class VRPRoute implements IRoute{
+public class VRPRoute implements IRoute {
 	/**
 	 * The route
 	 */
@@ -132,5 +132,4 @@ public class VRPRoute implements IRoute{
 	public List<Integer> getRoute() {
 		return this.route.getRoute();
 	}
-
 }
