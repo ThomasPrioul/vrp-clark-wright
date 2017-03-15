@@ -1,22 +1,22 @@
 package dii.vrp.test;
 
-import dii.vrp.data.CMT01;
 import dii.vrp.data.IDemands;
 import dii.vrp.data.IDistanceMatrix;
 import dii.vrp.data.VRPREPInstanceReader;
-import dii.vrp.tp.CVRPRouteEvaluator;
 import dii.vrp.tp.ClarkWright;
 import dii.vrp.tp.VRPSolution;
+
 import java.io.File;
-import java.io.FilenameFilter;
+import java.util.Arrays;
 
 public class TClarkWright {
     public static void main(String[] args) {
         // Instances to test
-        File instancesDirectory = new File("./data/christofides-et-al-1979-cmt/");
+        File[] instances = new File("./data/christofides-et-al-1979-cmt/").listFiles((file, s) -> s.endsWith(".xml"));
+        Arrays.sort(instances);
 
         // Test every instance
-        for (File instance : instancesDirectory.listFiles((file, s) -> s.endsWith(".xml"))) {
+        for (File instance : instances) {
             String filename = instance.getAbsolutePath();
 
             // Read data from the instance file and fire up the piloted Clark&Wright
