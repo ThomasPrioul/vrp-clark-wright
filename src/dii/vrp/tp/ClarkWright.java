@@ -50,11 +50,12 @@ public class ClarkWright {
      * @param savingsNodes The list of savings nodes.
      * @return The new optimized solution.
      */
-    private ISolution run(VRPSolution p_solution, List<SavingsNode> savingsNodes) {
+    private ISolution run(VRPSolution p_solution, List<SavingsNode> savingsNodes, int start, int end) {
         VRPSolution solution = (VRPSolution) p_solution.clone();
 
         // Iterate through all the saving nodes
-        for (SavingsNode node : savingsNodes) {
+        for (int iteration = start; iteration <= end; iteration++) {
+            SavingsNode node = savingsNodes.get(iteration);
             int mergedRouteIndex = -1;
 
             // Find a route whose last customer is C1
@@ -137,7 +138,8 @@ public class ClarkWright {
      */
     public ISolution naiveRun() {
         long startTime = System.nanoTime();
-        ISolution s = run(prepareInitialSolution(), createSavingsList());
+        List<SavingsNode> savings = createSavingsList();
+        ISolution s = run(prepareInitialSolution(), savings, 0, savings.size() - 1);
         long duration = System.nanoTime() - startTime;
         System.out.println("Time elapsed " + new DecimalFormat("#.#########").format(((double)duration / 1000000000)) + " s");
         return s;
@@ -171,36 +173,48 @@ public class ClarkWright {
         List<SavingsNode> initialSavings = createSavingsList();
 
         VRPSolution bestSolution = null;
+        VRPSolution bestPartialSolution = initialSolution;
         List<SavingsNode> bestSavings = initialSavings;
 
         // Find the best solution in k solutions for each iteration of the algorithm
         for (int iteration = 0; iteration < initialSavings.size(); iteration++) {
-            VRPSolution[] iterationSolutions = new VRPSolution[k];
+            ISolution[] partialSolutions = new VRPSolution[k];
+            ISolution[] endSolutions = new VRPSolution[k];
             ArrayList<SavingsNode>[] iterationSavings = new ArrayList[k];
 
             // Can do this in parallel
             for (int swap = 0; swap < k; swap++) {
                 final int jump = swap * coefficient;
+                final int iterationOffset = iteration + jump;
 
                 // Swap element at 'iteration' index with element 'swap' steps away
-                if (iteration + jump < initialSavings.size()) {
+                if (iterationOffset < initialSavings.size()) {
                     // Generate a different savings list by swapping 2 items
                     ArrayList<SavingsNode> newSavings = (ArrayList<SavingsNode>)cloneSavings(bestSavings);
                     SavingsNode iterationNode = newSavings.get(iteration);
-                    SavingsNode swapNode = newSavings.get(iteration + jump);
+                    SavingsNode swapNode = newSavings.get(iterationOffset);
                     newSavings.set(iteration, swapNode);
-                    newSavings.set(iteration + jump, iterationNode);
+                    newSavings.set(iterationOffset, iterationNode);
 
+                    // Run one iteration and keep the state for a possible late use
+                    VRPSolution iterationSolution = (VRPSolution) run(bestPartialSolution, newSavings, iteration, iteration);
+                    partialSolutions[swap] = iterationSolution;
                     iterationSavings[swap] = newSavings;
-                    iterationSolutions[swap] = (VRPSolution) run(initialSolution, newSavings);
+
+                    // Compute the rest of the solution, if possible, else just take it as it is.
+                    if (iteration+1 <= initialSavings.size()-1)
+                        endSolutions[swap] = run(iterationSolution, newSavings, iteration+1, initialSavings.size()-1);
+                    else
+                        endSolutions[swap] = iterationSolution;
                 }
             }
 
             // Change best solution when we've found a better one
             for (int i = 0; i < k; i++) {
-                VRPSolution sol = iterationSolutions[i];
+                ISolution sol = endSolutions[i];
                 if (sol != null && (bestSolution == null || sol.getOF() < bestSolution.getOF())) {
-                    bestSolution = (VRPSolution) sol.clone();
+                    bestSolution = (VRPSolution) endSolutions[i];
+                    bestPartialSolution = (VRPSolution) partialSolutions[i];
                     bestSavings = iterationSavings[i];
                 }
             }
