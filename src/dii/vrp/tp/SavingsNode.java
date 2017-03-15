@@ -22,4 +22,16 @@ public class SavingsNode {
     public double getSavings() {
         return this.savings;
     }
+
+    @Override
+    public boolean equals(Object object)
+    {
+        if (object != null && object instanceof SavingsNode)
+        {
+            SavingsNode other = (SavingsNode) object;
+            return ((savings == other.savings) &&
+                    ((from == other.to && to == other.from) || (from == other.from && to == other.to)));
+        }
+        return false;
+    }
 }
