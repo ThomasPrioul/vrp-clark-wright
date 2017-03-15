@@ -1,8 +1,10 @@
 package dii.vrp.tp;
 
+import com.sun.xml.internal.fastinfoset.sax.SystemIdResolver;
 import dii.vrp.data.IDemands;
 import dii.vrp.data.IDistanceMatrix;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -134,7 +136,11 @@ public class ClarkWright {
      * @return The optimized solution.
      */
     public ISolution naiveRun() {
-        return run(prepareInitialSolution(), createSavingsList());
+        long startTime = System.nanoTime();
+        ISolution s = run(prepareInitialSolution(), createSavingsList());
+        long duration = System.nanoTime() - startTime;
+        System.out.println("Time elapsed " + new DecimalFormat("#.#########").format(((double)duration / 1000000000)) + " s");
+        return s;
     }
 
     /**
@@ -157,6 +163,8 @@ public class ClarkWright {
     public ISolution pilotedRun(int k, int coefficient) {
         if (k <= 1)
             return naiveRun();
+
+        long startTime = System.nanoTime();
 
         // initialSolution
         VRPSolution initialSolution = prepareInitialSolution();
@@ -197,6 +205,9 @@ public class ClarkWright {
                 }
             }
         }
+
+        long duration = System.nanoTime() - startTime;
+        System.out.println("Time elapsed " + new DecimalFormat("#.#########").format(((double)duration / 1000000000)) + " s");
 
         return bestSolution;
     }
