@@ -20,6 +20,9 @@ public class TClarkWright {
             if (!filename.endsWith(".xml"))
                 continue;
 
+            if (!filename.endsWith("CMT01.xml"))
+                continue;
+
             // Read data from the instance file and fire up the piloted Clark&Wright
             try (VRPREPInstanceReader parser = new VRPREPInstanceReader(filename)) {
                 IDistanceMatrix distances = parser.getDistanceMatrix();
@@ -28,7 +31,7 @@ public class TClarkWright {
 
                 System.out.println("Testing instance " + instance.getName());
                 ClarkWright cw = new ClarkWright(distances, demands, Q);
-                VRPSolution solution = (VRPSolution) cw.run();
+                VRPSolution solution = (VRPSolution) cw.naiveRun();
                 System.out.println(solution);
             }
             catch (Exception e)
